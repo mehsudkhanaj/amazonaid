@@ -13,16 +13,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input"; // Keep Input import
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // Keep Card imports
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, storage, db } from "@/lib/firebase"; // Assuming db is exported from firebase.ts
+import { auth, storage, db, app } from "@/lib/firebase"; // Assuming db is exported from firebase.ts
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef } from "react";
 import { Loader2, UploadCloud } from "lucide-react";
+
+import { getAuth } from 'firebase/auth'; // Import getAuth
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -63,7 +65,8 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      // Use getAuth with the initialized app
+      const userCredential = await createUserWithEmailAndPassword(getAuth(app), values.email, values.password);
       const user = userCredential.user;
 
       let photoURL: string | undefined = undefined;
@@ -169,7 +172,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel className="font-body">Profile Picture (Optional)</FormLabel>
                   <FormControl>
-                    <>
+                    <div>
                       <Button
                         type="button"
                         variant="outline"
@@ -186,7 +189,7 @@ export function SignupForm() {
                         ref={fileInputRef}
                         onChange={handleFileChange}
                       />
-                    </>
+                    </div>
                   </FormControl>
                   {filePreview && (
                     <div className="mt-2 flex justify-center">
