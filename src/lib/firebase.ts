@@ -1,8 +1,8 @@
-
-import { initializeApp, getApps, getApp, FirebaseApp } from 'firebase/app';
-import { getAuth, Auth } from 'firebase/auth';
-import { getFirestore, Firestore } from 'firebase/firestore';
-import { getStorage, FirebaseStorage } from 'firebase/storage';
+// lib/firebase.ts
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,43 +13,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-let app: FirebaseApp;
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
-if (!getApps().length) {
-  if (
-    !firebaseConfig.apiKey ||
-    !firebaseConfig.authDomain ||
-    !firebaseConfig.projectId ||
-    !firebaseConfig.storageBucket ||
-    !firebaseConfig.messagingSenderId ||
-    !firebaseConfig.appId
-  ) {
-    console.error(
-      "Firebase configuration is missing one or more required fields. " +
-      "Please check your .env file and ensure all NEXT_PUBLIC_FIREBASE_ variables are set."
-    );
-    // Set app to a placeholder or handle the error appropriately to prevent further execution
-    // For now, we'll let it proceed, but Firebase operations will likely fail.
-    // It's better to ensure env vars are set.
-  }
-  app = initializeApp(firebaseConfig);
-} else {
-  app = getApp();
-}
-
-let auth: Auth;
-if (app && firebaseConfig.apiKey) { // Also check if apiKey is present, as it's crucial for auth
-  auth = getAuth(app);
-} else {
-  console.error(
-    "Firebase app is not initialized or API key is missing. Auth service cannot be loaded."
-  );
-  // @ts-ignore - auth will be undefined, consuming code should handle this
-  auth = undefined;
-}
-
-// Ensure app is defined before trying to use it for Firestore and Storage
-const db: Firestore = app && firebaseConfig.projectId ? getFirestore(app) : undefined as unknown as Firestore;
-const storage: FirebaseStorage = app && firebaseConfig.storageBucket ? getStorage(app) : undefined as unknown as FirebaseStorage;
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
 
 export { app, auth, db, storage };

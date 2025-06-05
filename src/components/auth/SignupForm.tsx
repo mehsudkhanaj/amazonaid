@@ -1,4 +1,3 @@
-
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -13,18 +12,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input"; // Keep Input import
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // Keep Card imports
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth, storage, db, app } from "@/lib/firebase"; // Assuming db is exported from firebase.ts
+import { auth, storage, db } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useRef } from "react";
 import { Loader2, UploadCloud } from "lucide-react";
-
-import { getAuth } from 'firebase/auth'; // Import getAuth
 
 const formSchema = z.object({
   email: z.string().email({ message: "Invalid email address." }),
@@ -65,8 +62,7 @@ export function SignupForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      // Use getAuth with the initialized app
-      const userCredential = await createUserWithEmailAndPassword(getAuth(app), values.email, values.password);
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
       let photoURL: string | undefined = undefined;
@@ -80,8 +76,7 @@ export function SignupForm() {
         displayName: values.displayName,
         photoURL: photoURL,
       });
-      
-      // Optionally, save user data to Firestore
+
       await setDoc(doc(db, "users", user.uid), {
         uid: user.uid,
         email: user.email,
@@ -120,7 +115,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel className="font-body">Display Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your Name" {...field} className="font-body"/>
+                    <Input placeholder="Your Name" {...field} className="font-body" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -133,7 +128,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel className="font-body">Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="your@email.com" {...field} className="font-body"/>
+                    <Input placeholder="your@email.com" {...field} className="font-body" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -146,7 +141,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel className="font-body">Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} className="font-body"/>
+                    <Input type="password" placeholder="••••••••" {...field} className="font-body" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -159,7 +154,7 @@ export function SignupForm() {
                 <FormItem>
                   <FormLabel className="font-body">Confirm Password</FormLabel>
                   <FormControl>
-                    <Input type="password" placeholder="••••••••" {...field} className="font-body"/>
+                    <Input type="password" placeholder="••••••••" {...field} className="font-body" />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,7 +163,7 @@ export function SignupForm() {
             <FormField
               control={form.control}
               name="profilePicture"
-              render={({ field }) => (
+              render={() => (
                 <FormItem>
                   <FormLabel className="font-body">Profile Picture (Optional)</FormLabel>
                   <FormControl>

@@ -1,3 +1,4 @@
+"use client"; // Add this directive for client-side interactivity
 
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,17 +6,71 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, FileText, BarChart3, PieChart } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useState } from "react"; // Import useState
 
-// Mock data for demonstration
-const mockExpenses = [
+// Define the type for an expense
+interface Expense {
+  id: string;
+  date: string;
+  category: string; // Added category
+  item: string;
+  amount: number;
+  store: string; // Added store
+}
+
+// Mock data for demonstration (will be replaced by database data)
+const initialExpenses: Expense[] = [
   { id: "1", date: "2024-07-15", category: "Groceries", item: "Milk, Bread, Eggs", amount: 25.50, store: "SuperMart" },
   { id: "2", date: "2024-07-14", category: "Utilities", item: "Electricity Bill", amount: 75.00, store: "Power Co." },
   { id: "3", date: "2024-07-12", category: "Transport", item: "Gasoline", amount: 40.00, store: "Gas Station" },
   { id: "4", date: "2024-07-10", category: "Entertainment", item: "Movie Tickets", amount: 30.00, store: "Cinema" },
 ];
 
-
 export default function ExpensesPage() {
+  const [expenses, setExpenses] = useState<Expense[]>(initialExpenses); // State to hold expenses
+  const [newItem, setNewItem] = useState("");
+  const [newAmount, setNewAmount] = useState("");
+  const [newDate, setNewDate] = useState("");
+  const [newCategory, setNewCategory] = useState(""); // State for category
+  const [newStore, setNewStore] = useState(""); // State for store
+
+  const handleAddExpense = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    // Basic validation
+    if (!newItem || !newAmount || !newDate || !newCategory || !newStore) {
+      alert("Please fill in all fields");
+      return;
+    }
+
+    const newExpense: Expense = {
+      id: Date.now().toString(), // Simple unique ID for now
+      date: newDate,
+      category: newCategory,
+      item: newItem,
+      amount: parseFloat(newAmount),
+      store: newStore,
+    };
+
+    // In a real application, you would send this data to your backend API to save to the database.
+    // For this example, we'll just add it to the local state.
+    setExpenses([...expenses, newExpense]);
+
+    // Clear the form
+    setNewItem("");
+    setNewAmount("");
+    setNewDate("");
+    setNewCategory("");
+    setNewStore("");
+  };
+
+  // PDF generation would also involve backend or a dedicated library
+  const handleGenerateReport = () => {
+    alert("PDF report generation coming soon!");
+    // Implement PDF generation logic here
+    // This would likely involve fetching data and using a library like jsPDF or sending data to a backend service
+  };
+
   return (
     <div className="flex-1 flex flex-col">
       <AppHeader title="Expense Tracker" />
@@ -27,29 +82,59 @@ export default function ExpensesPage() {
               <CardDescription className="font-body">Track, categorize, and analyze your spending.</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" className="font-body">
+              <Button variant="outline" className="font-body" onClick={handleGenerateReport}>
                 <FileText className="mr-2 h-4 w-4" /> Generate Report (PDF)
               </Button>
-              <Button className="font-body bg-primary hover:bg-primary/90">
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
-              </Button>
+              {/* The 'Add Expense' button next to Generate Report could trigger a modal or navigate to a dedicated add page if the form is elsewhere */}
             </div>
           </CardHeader>
           <CardContent>
-            {/* Add expense form placeholder */}
+            {/* Add expense form */}
             <div className="mb-6 p-4 border rounded-lg bg-muted/20">
               <h3 className="text-lg font-semibold font-headline mb-2">Add New Expense</h3>
-              <form className="grid md:grid-cols-3 gap-4">
-                <Input placeholder="Item/Service (e.g., Groceries)" className="font-body"/>
-                <Input type="number" placeholder="Amount (e.g., 45.50)" className="font-body"/>
-                <Input type="date" className="font-body"/>
-                {/* More fields: category, store, notes etc. */}
+              <form className="grid md:grid-cols-3 gap-4" onSubmit={handleAddExpense}> {/* Add onSubmit handler */}
+                <Input
+                  placeholder="Item/Service (e.g., Groceries)"
+                  className="font-body"
+                  value={newItem}
+                  onChange={(e) => setNewItem(e.target.value)}
+                />
+                 {/* Added Category Input */}
+                <Input
+                  placeholder="Category (e.g., Groceries, Utilities)"
+                  className="font-body"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                />
+                <Input
+                  type="number"
+                  placeholder="Amount (e.g., 45.50)"
+                  className="font-body"
+                  value={newAmount}
+                  onChange={(e) => setNewAmount(e.target.value)}
+                />
+                <Input
+                  type="date"
+                  className="font-body"
+                  value={newDate}
+                  onChange={(e) => setNewDate(e.target.value)}
+                />
+                 {/* Added Store Input */}
+                 <Input
+                  placeholder="Store/Vendor (e.g., SuperMart)"
+                  className="font-body"
+                  value={newStore}
+                  onChange={(e) => setNewStore(e.target.value)}
+                />
+                {/* The form button */}
+                <Button type="submit" className="font-body bg-primary hover:bg-primary/90 md:col-span-3"> {/* Make button span full width on medium screens */}
+                  <PlusCircle className="mr-2 h-4 w-4" /> Add Expense
+                </Button>
               </form>
-               <p className="text-sm text-muted-foreground mt-2 font-body">Full form coming soon.</p>
             </div>
 
             <h3 className="text-xl font-semibold font-headline mb-4">Recent Expenses</h3>
-             <Table>
+            <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead className="font-headline">Date</TableHead>
@@ -60,7 +145,7 @@ export default function ExpensesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {mockExpenses.map((expense) => (
+                {expenses.map((expense) => ( // Render expenses from state
                   <TableRow key={expense.id}>
                     <TableCell className="font-body">{expense.date}</TableCell>
                     <TableCell className="font-body">{expense.category}</TableCell>
@@ -71,7 +156,7 @@ export default function ExpensesPage() {
                 ))}
               </TableBody>
             </Table>
-             <p className="text-sm text-muted-foreground mt-4 font-body">Dynamic expense table and full CRUD functionality coming soon.</p>
+            <p className="text-sm text-muted-foreground mt-4 font-body">Note: Expenses added here are currently only stored in the browser's memory. Full CRUD functionality with a database is required for persistent storage.</p>
           </CardContent>
         </Card>
 
