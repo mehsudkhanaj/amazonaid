@@ -2,11 +2,12 @@
 
 import { AppHeader } from "@/components/layout/AppHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {  Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { PlusCircle, FileText, BarChart3, PieChart } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useState } from "react"; // Import useState
+import jsPDF from 'jspdf'; // Import jsPDF
+import { BarChart3, FileText, PieChart, PlusCircle } from "lucide-react";
 
 // Define the type for an expense
 interface Expense {
@@ -64,11 +65,39 @@ export default function ExpensesPage() {
     setNewStore("");
   };
 
-  // PDF generation would also involve backend or a dedicated library
+  // PDF generation logic using jsPDF
   const handleGenerateReport = () => {
-    alert("PDF report generation coming soon!");
-    // Implement PDF generation logic here
-    // This would likely involve fetching data and using a library like jsPDF or sending data to a backend service
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text("Expense Report", 14, 22);
+
+    // Add expenses data (simple table format)
+    let yPos = 30;
+    doc.setFontSize(12);
+    doc.text("Date", 14, yPos);
+    doc.text("Category", 40, yPos);
+    doc.text("Item", 70, yPos);
+    doc.text("Store", 120, yPos);
+    doc.text("Amount", 170, yPos, { align: "right" });
+
+    yPos += 5;
+    doc.setLineWidth(0.5);
+    doc.line(14, yPos, 196, yPos); // Draw a line
+
+    yPos += 5;
+    expenses.forEach((expense) => {
+      doc.text(expense.date, 14, yPos);
+      doc.text(expense.category, 40, yPos);
+      doc.text(expense.item, 70, yPos);
+      doc.text(expense.store, 120, yPos);
+      doc.text(`$${expense.amount.toFixed(2)}`, 170, yPos, { align: "right" });
+      yPos += 7;
+    });
+
+    // Save the PDF with a filename
+    doc.save("expense_report.pdf");
   };
 
   return (
