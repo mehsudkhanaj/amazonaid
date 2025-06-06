@@ -1,3 +1,4 @@
+
 "use client";
 
 import { AppHeader } from "@/components/layout/AppHeader";
@@ -25,6 +26,7 @@ const popularCryptos = ['bitcoin', 'ethereum', 'cardano', 'solana', 'dogecoin'];
 export default function CryptoPage() {
   const [cryptoData, setCryptoData] = useState<CryptoData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(""); // Added state for search term
   const { toast } = useToast();
 
   const fetchCryptoData = async () => {
@@ -53,6 +55,13 @@ export default function CryptoPage() {
     fetchCryptoData();
   }, []);
 
+  // Filter crypto data based on search term (optional, for future use)
+  const filteredCryptoData = cryptoData.filter(crypto =>
+    crypto.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    crypto.symbol.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  // For now, we will display all cryptoData and the search input is just for show until further functionality is added.
+
   return (
     <div className="flex-1 flex flex-col">
       <AppHeader title="Cryptocurrency Tracker" />
@@ -79,6 +88,8 @@ export default function CryptoPage() {
               <Input
                 placeholder="Search Cryptocurrency (e.g., Bitcoin, ETH)"
                 className="font-body max-w-sm"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
               <p className="text-xs text-muted-foreground mt-1 font-body">
                 Portfolio management and custom tracking coming soon.
@@ -109,7 +120,7 @@ export default function CryptoPage() {
                     </TableCell>
                   </TableRow>
                 ) : (
-                  cryptoData.map((crypto) => (
+                  cryptoData.map((crypto) => ( // Displaying all cryptoData for now
                     <TableRow key={crypto.id}>
                       <TableCell className="font-medium font-body flex items-center">
                         <Image
